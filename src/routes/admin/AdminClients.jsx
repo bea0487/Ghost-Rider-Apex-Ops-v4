@@ -5,11 +5,94 @@ import Button from '../../components/Button'
 import Modal from '../../components/Modal'
 import Field from '../../components/Field'
 import Input from '../../components/Input'
+import { supabase } from '../../lib/supabaseClient'
 
 export default function AdminClients() {
   const [open, setOpen] = React.useState(false)
   const [query, setQuery] = React.useState('')
   const [tier, setTier] = React.useState('all')
+
+  const [clients, setClients] = React.useState([])
+  const [loading, setLoading] = React.useState(true)
+  const [saving, setSaving] = React.useState(false)
+  const [error, setError] = React.useState('')
+  const [status, setStatus] = React.useState('')
+
+  const [email, setEmail] = React.useState('')
+  const [clientId, setClientId] = React.useState('')
+  const [companyName, setCompanyName] = React.useState('')
+  const [newTier, setNewTier] = React.useState('wingman')
+
+  async function loadClients() {
+    if (!supabase) return
+    setError('')
+    setLoading(true)
+    try {
+      const { data, error: e } = await supabase
+        .from('clients')
+        .select('id, email, client_id, company_name, tier, created_at')
+        .order('created_at', { ascending: false })
+
+      if (e) throw e
+      setClients(data || [])
+    } catch (e) {
+      setError(e?.message || 'Unable to load clients')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  React.useEffect(() => {
+    loadClients()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  function resetForm() {
+    setEmail('')
+    setClientId('')
+    setCompanyName('')
+    setNewTier('wingman')
+  }
+
+  async function onSaveClient(e) {
+    e.preventDefault()
+    setError('')
+    setStatus('')
+    setSaving(true)
+
+    try {
+      const normalizedEmail = String(email || '').trim().toLowerCase()
+      if (!normalizedEmail) throw new Error('Client Email is required')
+
+      const payload = {
+        email: normalizedEmail,
+        client_id: String(clientId || '').trim() || null,
+        company_name: String(companyName || '').trim() || null,
+        tier: newTier,
+      }
+
+      const { error: insertErr } = await supabase.from('clients').insert(payload)
+      if (insertErr) throw insertErr
+
+      setStatus(`Client created: ${normalizedEmail}`)
+      setOpen(false)
+      resetForm()
+      await loadClients()
+    } catch (e2) {
+      setError(e2?.message || 'Unable to create client')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const q = String(query || '').trim().toLowerCase()
+  const filtered = clients.filter((c) => {
+    const matchesTier = tier === 'all' ? true : c.tier === tier
+    if (!q) return matchesTier
+
+    const hay = `${c.company_name || ''} ${c.email || ''} ${c.client_id || ''}`.toLowerCase()
+    return matchesTier && hay.includes(q)
+  })
 
   return (
     <AdminLayout>
@@ -19,7 +102,6 @@ export default function AdminClients() {
             <h1 className="font-orbitron font-bold text-2xl text-white">Clients</h1>
             <p className="text-gray-400 font-rajdhani">Manage your client accounts</p>
           </div>
-
           <Button onClick={() => setOpen(true)} className="bg-fuchsia-600 hover:bg-fuchsia-500">
             <span className="inline-flex items-center gap-2">
               <Plus size={16} />
@@ -27,6 +109,14 @@ export default function AdminClients() {
             </span>
           </Button>
         </div>
+
+        {error ? (
+          <div className="rounded-xl border border-red-400/20 bg-red-500/10 p-3 font-rajdhani text-red-200">{error}</div>
+        ) : null}
+
+        {status ? (
+          <div className="rounded-xl border border-fuchsia-400/20 bg-fuchsia-500/10 p-3 font-rajdhani text-fuchsia-100">{status}</div>
+        ) : null}
 
         <div className="flex flex-col gap-3 md:flex-row md:items-center">
           <div className="relative flex-1">
@@ -51,41 +141,83 @@ export default function AdminClients() {
           </select>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-[#0d0d14] p-8">
-          <div className="mx-auto max-w-md text-center">
-            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/5">
-              <Users2 className="text-gray-400" size={24} />
+        <div className="rounded-2xl border border-white/10 bg-[#0d0d14] p-6">
+          {loading ? (
+            <div className="font-rajdhani text-gray-400">Loading…</div>
+          ) : filtered.length === 0 ? (
+            <div className="mx-auto max-w-md text-center py-2">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/5">
+                <Users2 className="text-gray-400" size={24} />
+              </div>
+              <div className="font-orbitron text-sm text-white">No Clients Found</div>
+              <div className="mt-1 font-rajdhani text-gray-400">Add your first client to get started.</div>
+              <div className="mt-4">
+                <Button onClick={() => setOpen(true)} className="bg-fuchsia-600 hover:bg-fuchsia-500">
+                  <span className="inline-flex items-center gap-2">
+                    <Plus size={16} />
+                    Add Your First Client
+                  </span>
+                </Button>
+              </div>
             </div>
-            <div className="font-orbitron text-sm text-white">No Clients Found</div>
-            <div className="mt-1 font-rajdhani text-gray-400">Add your first client to get started.</div>
-            <div className="mt-4">
-              <Button onClick={() => setOpen(true)} className="bg-fuchsia-600 hover:bg-fuchsia-500">
-                <span className="inline-flex items-center gap-2">
-                  <Plus size={16} />
-                  Add Your First Client
-                </span>
-              </Button>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[720px]">
+                <thead>
+                  <tr className="text-left text-xs font-orbitron tracking-wide text-white/70">
+                    <th className="py-3 pr-4">Company</th>
+                    <th className="py-3 pr-4">Email</th>
+                    <th className="py-3 pr-4">Client ID</th>
+                    <th className="py-3 pr-4">Tier</th>
+                    <th className="py-3">UUID</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/10">
+                  {filtered.map((c) => (
+                    <tr key={c.id} className="font-rajdhani text-sm text-white/80">
+                      <td className="py-3 pr-4">{c.company_name || '—'}</td>
+                      <td className="py-3 pr-4">{c.email}</td>
+                      <td className="py-3 pr-4">{c.client_id || '—'}</td>
+                      <td className="py-3 pr-4">{c.tier}</td>
+                      <td className="py-3 font-mono text-xs text-white/60">{c.id}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          </div>
+          )}
         </div>
 
-        <Modal open={open} onClose={() => setOpen(false)} title="Add Client" widthClass="max-w-xl">
-          <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+        <Modal
+          open={open}
+          onClose={() => {
+            setOpen(false)
+            setError('')
+            setStatus('')
+          }}
+          title="Add Client"
+          widthClass="max-w-xl"
+        >
+          <form className="space-y-4" onSubmit={onSaveClient}>
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="Client Email">
-                <Input type="email" placeholder="client@company.com" />
+                <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="client@company.com" required />
               </Field>
               <Field label="Client ID">
-                <Input placeholder="DOT / internal ID" />
+                <Input value={clientId} onChange={(e) => setClientId(e.target.value)} placeholder="DOT / internal ID" />
               </Field>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="Company Name">
-                <Input placeholder="Company" />
+                <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Company" />
               </Field>
               <Field label="Tier">
-                <select className="w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 font-rajdhani text-white outline-none focus:border-fuchsia-500/40">
+                <select
+                  value={newTier}
+                  onChange={(e) => setNewTier(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 font-rajdhani text-white outline-none focus:border-fuchsia-500/40"
+                >
                   <option value="wingman">Wingman</option>
                   <option value="guardian">Guardian</option>
                   <option value="apex_command">Apex Command</option>
@@ -97,8 +229,8 @@ export default function AdminClients() {
               <Button type="button" onClick={() => setOpen(false)} className="bg-white/5 hover:bg-white/10">
                 Cancel
               </Button>
-              <Button type="button" className="bg-fuchsia-600 hover:bg-fuchsia-500">
-                Save Client
+              <Button type="submit" disabled={saving} className="bg-fuchsia-600 hover:bg-fuchsia-500">
+                {saving ? 'Saving…' : 'Save Client'}
               </Button>
             </div>
           </form>
