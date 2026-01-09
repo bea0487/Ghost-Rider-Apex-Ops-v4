@@ -11,6 +11,7 @@ async function callEdgeFunction(path, body) {
     import.meta.env.VITE_SUPABASE_FUNCTIONS_URL ||
     (import.meta.env.VITE_SUPABASE_URL ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1` : '')
   if (!base) throw new Error('Missing VITE_SUPABASE_URL (or VITE_SUPABASE_FUNCTIONS_URL override)')
+  if (!import.meta.env.VITE_SUPABASE_ANON_KEY) throw new Error('Missing VITE_SUPABASE_ANON_KEY')
 
   const { data } = await supabase.auth.getSession()
   const token = data?.session?.access_token
@@ -21,6 +22,7 @@ async function callEdgeFunction(path, body) {
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
+      apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
     },
     body: JSON.stringify(body),
   })
