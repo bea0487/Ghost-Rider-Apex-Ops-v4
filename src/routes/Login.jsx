@@ -5,6 +5,7 @@ import Field from '../components/Field'
 import Input from '../components/Input'
 import Button from '../components/Button'
 import { signInWithPassword } from '../lib/auth'
+import { supabase } from '../lib/supabaseClient'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -13,11 +14,16 @@ export default function Login() {
   const [error, setError] = React.useState('')
   const [loading, setLoading] = React.useState(false)
 
-  function withTimeout(promise, ms) {
-    return Promise.race([
-      promise,
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Sign-in timed out. Check Vercel env vars and Supabase status, then try again.')), ms)),
-    ])
+  async function withTimeout(fn, ms, timeoutMessage) {
+    let timeoutId
+    try {
+      const timeoutPromise = new Promise((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error(timeoutMessage)), ms)
+      })
+      return await Promise.race([fn(), timeoutPromise])
+    } finally {
+      clearTimeout(timeoutId)
+    }
   }
 
   async function onSubmit(e) {
@@ -25,7 +31,22 @@ export default function Login() {
     setError('')
     setLoading(true)
     try {
-      await withTimeout(signInWithPassword({ email, password }), 10000)
+      await withTimeout(
+        () => signInWithPassword({ email, password }),
+        20000,
+        'Sign-in timed out. Check Vercel env vars and Supabase status, then try again.',
+      )
+
+      const { data } = await withTimeout(
+        () => supabase.auth.getSession(),
+        8000,
+        'Signed in, but session was not established. Disable strict privacy extensions and try again.',
+      )
+
+      if (!data?.session) {
+        throw new Error('Signed in, but no session was stored. Disable strict privacy extensions and try again.')
+      }
+
       navigate('/portal')
     } catch (err) {
       setError(err?.message || 'Unable to sign in')

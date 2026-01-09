@@ -16,6 +16,14 @@ import MarketingApexCommand from './marketing/pages/ApexCommand'
 import BootstrapAdmin from './routes/BootstrapAdmin'
 import NotFound from './routes/NotFound'
 
+import AdminClients from './routes/admin/AdminClients'
+import AdminEldReports from './routes/admin/AdminEldReports'
+import AdminCsaScores from './routes/admin/AdminCsaScores'
+import AdminIfta from './routes/admin/AdminIfta'
+import AdminDataq from './routes/admin/AdminDataq'
+import AdminDriverFiles from './routes/admin/AdminDriverFiles'
+import AdminTickets from './routes/admin/AdminTickets'
+
 import {
   PortalDashboard,
   PortalELDReports,
@@ -110,7 +118,7 @@ export default function App() {
         path="/admin/clients"
         element={
           <ProtectedRoute>
-            <AdminDashboard />
+            <AdminClients />
           </ProtectedRoute>
         }
       />
@@ -119,7 +127,7 @@ export default function App() {
         path="/admin/eld-reports"
         element={
           <ProtectedRoute>
-            <AdminDashboard />
+            <AdminEldReports />
           </ProtectedRoute>
         }
       />
@@ -128,7 +136,7 @@ export default function App() {
         path="/admin/csa-scores"
         element={
           <ProtectedRoute>
-            <AdminDashboard />
+            <AdminCsaScores />
           </ProtectedRoute>
         }
       />
@@ -137,7 +145,7 @@ export default function App() {
         path="/admin/ifta"
         element={
           <ProtectedRoute>
-            <AdminDashboard />
+            <AdminIfta />
           </ProtectedRoute>
         }
       />
@@ -146,7 +154,7 @@ export default function App() {
         path="/admin/dataq"
         element={
           <ProtectedRoute>
-            <AdminDashboard />
+            <AdminDataq />
           </ProtectedRoute>
         }
       />
@@ -155,7 +163,7 @@ export default function App() {
         path="/admin/driver-files"
         element={
           <ProtectedRoute>
-            <AdminDashboard />
+            <AdminDriverFiles />
           </ProtectedRoute>
         }
       />
@@ -164,7 +172,7 @@ export default function App() {
         path="/admin/tickets"
         element={
           <ProtectedRoute>
-            <AdminDashboard />
+            <AdminTickets />
           </ProtectedRoute>
         }
       />

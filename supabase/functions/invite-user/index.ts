@@ -19,6 +19,14 @@ type Payload = {
   company_name?: string
 }
 
+function getRedirectTo(req: Request) {
+  const siteUrl = Deno.env.get('GR_SITE_URL')
+  const origin = req.headers.get('origin')
+  const base = (origin || siteUrl || '').replace(/\/$/, '')
+  if (!base) return undefined
+  return `${base}/auth/callback`
+}
+
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -52,7 +60,10 @@ Deno.serve(async (req) => {
   }
 
   // Invite user (Supabase email flow for first-time password set)
-  const { data: inviteData, error: inviteErr } = await admin.auth.admin.inviteUserByEmail(payload.email)
+  const redirectTo = getRedirectTo(req)
+  const { data: inviteData, error: inviteErr } = await admin.auth.admin.inviteUserByEmail(payload.email, {
+    redirectTo,
+  })
   if (inviteErr) return json({ error: inviteErr.message }, 400)
 
   const invitedUserId = inviteData?.user?.id
