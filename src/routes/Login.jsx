@@ -13,12 +13,19 @@ export default function Login() {
   const [error, setError] = React.useState('')
   const [loading, setLoading] = React.useState(false)
 
+  function withTimeout(promise, ms) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Sign-in timed out. Check Vercel env vars and Supabase status, then try again.')), ms)),
+    ])
+  }
+
   async function onSubmit(e) {
     e.preventDefault()
     setError('')
     setLoading(true)
     try {
-      await signInWithPassword({ email, password })
+      await withTimeout(signInWithPassword({ email, password }), 10000)
       navigate('/portal')
     } catch (err) {
       setError(err?.message || 'Unable to sign in')
