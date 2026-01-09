@@ -7,6 +7,41 @@ import Field from '../../components/Field'
 import Input from '../../components/Input'
 import { supabase } from '../../lib/supabaseClient'
 
+function withTimeout(promise, ms, label) {
+  let t
+  const timeout = new Promise((_, reject) => {
+    t = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms)
+  })
+
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(t))
+}
+
+async function callEdgeFunction(path, body) {
+  const base =
+    import.meta.env.VITE_SUPABASE_FUNCTIONS_URL ||
+    (import.meta.env.VITE_SUPABASE_URL ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1` : '')
+  if (!base) throw new Error('Missing VITE_SUPABASE_URL (or VITE_SUPABASE_FUNCTIONS_URL override)')
+  if (!import.meta.env.VITE_SUPABASE_ANON_KEY) throw new Error('Missing VITE_SUPABASE_ANON_KEY')
+
+  const { data } = await supabase.auth.getSession()
+  const token = data?.session?.access_token
+  if (!token) throw new Error('No active session')
+
+  const res = await fetch(`${base}/${path}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+      apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+    },
+    body: JSON.stringify(body),
+  })
+
+  const json = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(json?.error || 'Request failed')
+  return json
+}
+
 export default function AdminClients() {
   const [open, setOpen] = React.useState(false)
   const [query, setQuery] = React.useState('')
@@ -28,13 +63,8 @@ export default function AdminClients() {
     setError('')
     setLoading(true)
     try {
-      const { data, error: e } = await supabase
-        .from('clients')
-        .select('id, email, client_id, company_name, tier, created_at')
-        .order('created_at', { ascending: false })
-
-      if (e) throw e
-      setClients(data || [])
+      const result = await withTimeout(callEdgeFunction('admin-clients', { action: 'list' }), 15000, 'Load clients')
+      setClients(Array.isArray(result?.clients) ? result.clients : [])
     } catch (e) {
       setError(e?.message || 'Unable to load clients')
     } finally {
@@ -65,14 +95,14 @@ export default function AdminClients() {
       if (!normalizedEmail) throw new Error('Client Email is required')
 
       const payload = {
+        action: 'create',
         email: normalizedEmail,
-        client_id: String(clientId || '').trim() || null,
-        company_name: String(companyName || '').trim() || null,
+        client_id: String(clientId || '').trim() || undefined,
+        company_name: String(companyName || '').trim() || undefined,
         tier: newTier,
       }
 
-      const { error: insertErr } = await supabase.from('clients').insert(payload)
-      if (insertErr) throw insertErr
+      await withTimeout(callEdgeFunction('admin-clients', payload), 15000, 'Create client')
 
       setStatus(`Client created: ${normalizedEmail}`)
       setOpen(false)
