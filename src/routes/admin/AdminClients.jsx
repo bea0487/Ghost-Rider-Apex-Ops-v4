@@ -46,8 +46,20 @@ export default function AdminClients() {
     setError('')
     setLoading(true)
     try {
-      const result = await withTimeout(callEdgeFunction('admin-clients', { action: 'list' }), 15000, 'Load clients')
-      setClients(Array.isArray(result?.clients) ? result.clients : [])
+      // Attempt direct database access first
+      const { data, error: dbError } = await supabase
+        .from('clients')
+        .select('id, email, client_id, company_name, tier, created_at')
+        .order('created_at', { ascending: false })
+
+      if (dbError) {
+        // If RLS blocks it, it will throw an error (usually code 42501)
+        console.warn('Direct fetch failed, falling back to Edge Function:', dbError)
+        const result = await withTimeout(callEdgeFunction('admin-clients', { action: 'list' }), 15000, 'Load clients')
+        setClients(Array.isArray(result?.clients) ? result.clients : [])
+      } else {
+        setClients(data || [])
+      }
     } catch (e) {
       setError(e?.message || 'Unable to load clients')
     } finally {
@@ -85,7 +97,18 @@ export default function AdminClients() {
         tier: newTier,
       }
 
-      await withTimeout(callEdgeFunction('admin-clients', payload), 15000, 'Create client')
+      // Try direct insert first
+      const { error: dbError } = await supabase.from('clients').insert({
+        email: payload.email,
+        client_id: payload.client_id || null,
+        company_name: payload.company_name || null,
+        tier: payload.tier,
+      })
+
+      if (dbError) {
+        console.warn('Direct create failed, falling back to Edge Function:', dbError)
+        await withTimeout(callEdgeFunction('admin-clients', payload), 15000, 'Create client')
+      }
 
       setStatus(`Client created: ${normalizedEmail}`)
       setOpen(false)
