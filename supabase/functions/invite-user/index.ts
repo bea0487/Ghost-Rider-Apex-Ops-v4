@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
 
   // Create linked client record
   const { error: clientErr } = await admin.from('clients').insert({
-    user_id: invitedUserId,
+    email: payload.email,
     client_id: payload.client_id,
     company_name: payload.company_name || null,
     tier: payload.tier,

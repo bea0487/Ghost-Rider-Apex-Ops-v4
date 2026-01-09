@@ -4,13 +4,13 @@ export async function fetchMyClientProfile() {
   const { data: userData, error: userErr } = await supabase.auth.getUser()
   if (userErr) throw userErr
 
-  const userId = userData?.user?.id
-  if (!userId) throw new Error('Not signed in')
+  const email = userData?.user?.email
+  if (!email) throw new Error('Not signed in')
 
   const { data, error } = await supabase
     .from('clients')
-    .select('id, client_id, company_name, tier, user_id')
-    .eq('user_id', userId)
+    .select('id, email, client_id, company_name, tier')
+    .eq('email', email)
     .maybeSingle()
 
   if (error) throw error

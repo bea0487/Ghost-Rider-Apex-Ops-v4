@@ -19,12 +19,12 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = React.useState(true)
   const [authError, setAuthError] = React.useState(null)
 
-  const fetchClientProfile = React.useCallback(async (userId) => {
+  const fetchClientProfile = React.useCallback(async (email) => {
     try {
       const { data, error } = await supabase
         .from('clients')
-        .select('id, client_id, company_name, tier, user_id')
-        .eq('user_id', userId)
+        .select('id, email, client_id, company_name, tier')
+        .eq('email', email)
         .maybeSingle()
 
       if (error) {
@@ -39,9 +39,9 @@ export function AuthProvider({ children }) {
   }, [])
 
   const refreshClientProfile = React.useCallback(async () => {
-    if (!user?.id) return
-    await fetchClientProfile(user.id)
-  }, [fetchClientProfile, user?.id])
+    if (!user?.email) return
+    await fetchClientProfile(user.email)
+  }, [fetchClientProfile, user?.email])
 
   React.useEffect(() => {
     if (!supabase) {
@@ -67,8 +67,8 @@ export function AuthProvider({ children }) {
         setUser(u)
         setIsAdmin(Boolean(u?.app_metadata?.role === 'admin'))
 
-        if (u?.id) {
-          await fetchClientProfile(u.id)
+        if (u?.email) {
+          await fetchClientProfile(u.email)
         } else {
           setClient(null)
         }
@@ -90,8 +90,8 @@ export function AuthProvider({ children }) {
       setAuthError(null)
       setIsAdmin(Boolean(u?.app_metadata?.role === 'admin'))
 
-      if (u?.id) {
-        await fetchClientProfile(u.id)
+      if (u?.email) {
+        await fetchClientProfile(u.email)
       } else {
         setClient(null)
       }
