@@ -1,7 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import Shell from '../components/Shell'
-import { supabase } from '../lib/supabaseClient'
+import { isSupabaseConfigured, supabase } from '../lib/supabaseClient'
 
 export default function AuthCallback() {
   const navigate = useNavigate()
@@ -12,6 +12,11 @@ export default function AuthCallback() {
 
     async function run() {
       try {
+        if (!isSupabaseConfigured) {
+          navigate('/setup', { replace: true })
+          return
+        }
+
         // Handles invite / magic link / OAuth code flow if present.
         const url = new URL(window.location.href)
         const code = url.searchParams.get('code')
