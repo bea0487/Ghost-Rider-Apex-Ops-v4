@@ -16,7 +16,7 @@ export default function HomeRedirect() {
         if (error) throw error
         if (!mounted) return
         const role = data?.user?.app_metadata?.role
-        setIsAdmin(role === 'apex_command')
+        setIsAdmin(role === 'admin')
       } catch (_e) {
         if (!mounted) return
         setIsAdmin(false)

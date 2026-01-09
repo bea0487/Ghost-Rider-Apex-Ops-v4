@@ -40,11 +40,11 @@ Deno.serve(async (req) => {
 
   const admin = createClient(supabaseUrl, serviceRoleKey)
 
-  // Verify caller & require app_metadata.role === 'apex_command'
+  // Verify caller & require app_metadata.role === 'admin'
   const { data: caller, error: callerErr } = await admin.auth.getUser(jwt)
   if (callerErr) return json({ error: callerErr.message }, 401)
   const role = caller?.user?.app_metadata?.role
-  if (role !== 'apex_command') return json({ error: 'Forbidden' }, 403)
+  if (role !== 'admin') return json({ error: 'Forbidden' }, 403)
 
   const payload = (await req.json().catch(() => null)) as Payload | null
   if (!payload?.email || !payload?.client_id || !payload?.tier) {

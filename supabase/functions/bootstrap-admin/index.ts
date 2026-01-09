@@ -1,5 +1,5 @@
 // Supabase Edge Function: bootstrap-admin
-// Promotes the caller's user to admin by setting app_metadata.role = 'apex_command'.
+// Promotes the caller's user to admin by setting app_metadata.role = 'admin'.
 // Use once: protect with BOOTSTRAP_ADMIN_SECRET.
 // Requires:
 // - GR_SUPABASE_URL
@@ -46,18 +46,18 @@ Deno.serve(async (req) => {
   if (!callerId) return json({ error: 'No caller' }, 401)
 
   const currentRole = caller?.user?.app_metadata?.role
-  if (currentRole === 'apex_command') {
-    return json({ ok: true, user_id: callerId, role: 'apex_command', already: true })
+  if (currentRole === 'admin') {
+    return json({ ok: true, user_id: callerId, role: 'admin', already: true })
   }
 
   const { error: updateErr } = await admin.auth.admin.updateUserById(callerId, {
     app_metadata: {
       ...(caller?.user?.app_metadata || {}),
-      role: 'apex_command',
+      role: 'admin',
     },
   })
 
   if (updateErr) return json({ error: updateErr.message }, 400)
 
-  return json({ ok: true, user_id: callerId, role: 'apex_command' })
+  return json({ ok: true, user_id: callerId, role: 'admin' })
 })
