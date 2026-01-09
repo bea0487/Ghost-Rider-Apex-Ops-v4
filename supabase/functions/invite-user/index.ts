@@ -1,8 +1,8 @@
 // Supabase Edge Function: invite-user
 // Securely invites a user and creates the linked public.clients row.
 // Requires:
-// - SUPABASE_URL
-// - SUPABASE_SERVICE_ROLE_KEY
+// - GR_SUPABASE_URL
+// - GR_SERVICE_ROLE_KEY
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
 
@@ -23,8 +23,8 @@ function json(body: unknown, status = 200) {
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405)
 
-  const supabaseUrl = Deno.env.get('SUPABASE_URL')
-  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  const supabaseUrl = Deno.env.get('GR_SUPABASE_URL')
+  const serviceRoleKey = Deno.env.get('GR_SERVICE_ROLE_KEY')
   if (!supabaseUrl || !serviceRoleKey) return json({ error: 'Server misconfigured' }, 500)
 
   const authHeader = req.headers.get('Authorization') || ''
