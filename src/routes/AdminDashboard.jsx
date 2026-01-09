@@ -1,10 +1,10 @@
 import React from 'react'
 import { supabase } from '../lib/supabaseClient'
-import Shell from '../components/Shell'
 import Button from '../components/Button'
 import Field from '../components/Field'
 import Input from '../components/Input'
 import TextArea from '../components/TextArea'
+import AdminLayout from '../components/AdminLayout'
 
 async function callEdgeFunction(path, body) {
   const base =
@@ -116,97 +116,99 @@ export default function AdminDashboard() {
   }
 
   return (
-    <Shell
-      title="Admin Dashboard"
-      subtitle="Apex Command"
-      right={<Button onClick={onSignOut}>Sign Out</Button>}
-    >
-      {error ? (
-        <div className="mb-4 rounded-xl border border-red-400/20 bg-red-500/10 p-3 font-rajdhani text-red-200">
-          {error}
+    <AdminLayout right={<Button onClick={onSignOut}>Sign Out</Button>}>
+      <div className="space-y-6">
+        <div>
+          <h1 className="font-orbitron font-bold text-2xl text-white">Admin Dashboard</h1>
+          <p className="text-gray-400 font-rajdhani">Manage your clients and compliance data</p>
         </div>
-      ) : null}
 
-      {status ? (
-        <div className="mb-4 rounded-xl border border-cyan-400/20 bg-cyan-500/10 p-3 font-rajdhani text-cyan-100">
-          {status}
-        </div>
-      ) : null}
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl border border-white/10 bg-black/30 p-5">
-          <div className="font-orbitron text-sm tracking-wide text-white/90">Invite Client</div>
-          <div className="mt-1 font-rajdhani text-white/60">
-            Creates the user via secure Edge Function and creates the linked client record.
+        {error ? (
+          <div className="rounded-xl border border-red-400/20 bg-red-500/10 p-3 font-rajdhani text-red-200">
+            {error}
           </div>
+        ) : null}
 
-          <form onSubmit={onInvite} className="mt-4 space-y-4">
-            <Field label="Client Email">
-              <Input value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} type="email" required />
-            </Field>
+        {status ? (
+          <div className="rounded-xl border border-cyan-400/20 bg-cyan-500/10 p-3 font-rajdhani text-cyan-100">
+            {status}
+          </div>
+        ) : null}
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Client ID" hint="Operational identifier">
-                <Input value={clientId} onChange={(e) => setClientId(e.target.value)} required />
-              </Field>
-              <Field label="Tier">
-                <select
-                  value={inviteTier}
-                  onChange={(e) => setInviteTier(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 font-rajdhani text-white outline-none focus:border-cyan-400/40"
-                >
-                  <option value="wingman">Wingman</option>
-                  <option value="guardian">Guardian</option>
-                  <option value="apex_command">Apex Command</option>
-                </select>
-              </Field>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="bg-[#0d0d14] border border-fuchsia-500/20 rounded-xl p-5">
+            <div className="font-orbitron text-sm tracking-wide text-white/90">Invite Client</div>
+            <div className="mt-1 font-rajdhani text-gray-400">
+              Creates the user via secure Edge Function and creates the linked client record.
             </div>
 
-            <Field label="Company Name">
-              <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
-            </Field>
+            <form onSubmit={onInvite} className="mt-4 space-y-4">
+              <Field label="Client Email">
+                <Input value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} type="email" required />
+              </Field>
 
-            <Button type="submit" className="w-full">Invite</Button>
-          </form>
-        </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <Field label="Client ID" hint="Operational identifier">
+                  <Input value={clientId} onChange={(e) => setClientId(e.target.value)} required />
+                </Field>
+                <Field label="Tier">
+                  <select
+                    value={inviteTier}
+                    onChange={(e) => setInviteTier(e.target.value)}
+                    className="w-full rounded-xl border border-fuchsia-500/20 bg-[#0a0a0f] px-3 py-2 font-rajdhani text-white outline-none focus:border-fuchsia-500/40"
+                  >
+                    <option value="wingman">Wingman</option>
+                    <option value="guardian">Guardian</option>
+                    <option value="apex_command">Apex Command</option>
+                  </select>
+                </Field>
+              </div>
 
-        <div className="rounded-2xl border border-white/10 bg-black/30 p-5">
-          <div className="font-orbitron text-sm tracking-wide text-white/90">Create Weekly ELD Report</div>
-          <div className="mt-1 font-rajdhani text-white/60">
-            Conditional validation: Corrective Actions is required when Violations &gt; 0.
+              <Field label="Company Name">
+                <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+              </Field>
+
+              <Button type="submit" className="w-full">Invite</Button>
+            </form>
           </div>
 
-          <form onSubmit={onCreateEldReport} className="mt-4 space-y-4">
-            <Field label="Client UUID" hint="public.clients.id">
-              <Input value={reportClientUuid} onChange={(e) => setReportClientUuid(e.target.value)} required />
-            </Field>
-            <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Week Start">
-                <Input value={weekStart} onChange={(e) => setWeekStart(e.target.value)} type="date" required />
-              </Field>
-              <Field label="Violations">
-                <Input value={violations} onChange={(e) => setViolations(e.target.value)} type="number" min="0" />
-              </Field>
+          <div className="bg-[#0d0d14] border border-fuchsia-500/20 rounded-xl p-5">
+            <div className="font-orbitron text-sm tracking-wide text-white/90">Create Weekly ELD Report</div>
+            <div className="mt-1 font-rajdhani text-gray-400">
+              Conditional validation: Corrective Actions is required when Violations &gt; 0.
             </div>
 
-            <Field label="Corrective Actions" hint={Number(violations) > 0 ? 'Required' : 'Optional'}>
-              <TextArea value={correctiveActions} onChange={(e) => setCorrectiveActions(e.target.value)} placeholder="Describe corrective actions…" />
-            </Field>
+            <form onSubmit={onCreateEldReport} className="mt-4 space-y-4">
+              <Field label="Client UUID" hint="public.clients.id">
+                <Input value={reportClientUuid} onChange={(e) => setReportClientUuid(e.target.value)} required />
+              </Field>
 
-            <Field label="Report Notes">
-              <TextArea value={reportNotes} onChange={(e) => setReportNotes(e.target.value)} placeholder="Optional notes…" />
-            </Field>
+              <div className="grid gap-4 md:grid-cols-2">
+                <Field label="Week Start">
+                  <Input value={weekStart} onChange={(e) => setWeekStart(e.target.value)} type="date" required />
+                </Field>
+                <Field label="Violations">
+                  <Input value={violations} onChange={(e) => setViolations(e.target.value)} type="number" min="0" />
+                </Field>
+              </div>
 
-            <Button type="submit" className="w-full">Create Report</Button>
-          </form>
+              <Field label="Corrective Actions" hint={Number(violations) > 0 ? 'Required' : 'Optional'}>
+                <TextArea
+                  value={correctiveActions}
+                  onChange={(e) => setCorrectiveActions(e.target.value)}
+                  placeholder="Describe corrective actions…"
+                />
+              </Field>
+
+              <Field label="Report Notes">
+                <TextArea value={reportNotes} onChange={(e) => setReportNotes(e.target.value)} placeholder="Optional notes…" />
+              </Field>
+
+              <Button type="submit" className="w-full">Create Report</Button>
+            </form>
+          </div>
         </div>
       </div>
-
-      <div className="mt-6 grid gap-4 md:grid-cols-3">
-        <img src="/images/apex-truck.png" alt="" className="h-40 w-full rounded-2xl object-cover opacity-90" />
-        <img src="/images/guardian-truck.png" alt="" className="h-40 w-full rounded-2xl object-cover opacity-90" />
-        <img src="/images/wingman-cab.png" alt="" className="h-40 w-full rounded-2xl object-cover opacity-90" />
-      </div>
-    </Shell>
+    </AdminLayout>
   )
 }

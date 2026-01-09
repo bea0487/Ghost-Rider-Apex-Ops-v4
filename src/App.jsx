@@ -16,6 +16,17 @@ import MarketingApexCommand from './marketing/pages/ApexCommand'
 import BootstrapAdmin from './routes/BootstrapAdmin'
 import NotFound from './routes/NotFound'
 
+import {
+  PortalDashboard,
+  PortalELDReports,
+  PortalCSAScores,
+  PortalIFTATracking,
+  PortalDataQDisputes,
+  PortalDriverFiles,
+  PortalSupportTickets,
+  PortalSettings,
+} from './portal'
+
 export default function App() {
   return (
     <Routes>
@@ -96,10 +107,136 @@ export default function App() {
       />
 
       <Route
+        path="/admin/clients"
+        element={
+          <ProtectedRoute>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/eld-reports"
+        element={
+          <ProtectedRoute>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/csa-scores"
+        element={
+          <ProtectedRoute>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/ifta"
+        element={
+          <ProtectedRoute>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/dataq"
+        element={
+          <ProtectedRoute>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/driver-files"
+        element={
+          <ProtectedRoute>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/tickets"
+        element={
+          <ProtectedRoute>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
         path="/app"
         element={
           <ProtectedRoute>
-            <ClientDashboard />
+            <PortalDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/app/eld-reports"
+        element={
+          <ProtectedRoute>
+            <PortalELDReports />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/app/csa-scores"
+        element={
+          <ProtectedRoute>
+            <PortalCSAScores />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/app/ifta"
+        element={
+          <ProtectedRoute>
+            <PortalIFTATracking />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/app/dataq"
+        element={
+          <ProtectedRoute>
+            <PortalDataQDisputes />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/app/driver-files"
+        element={
+          <ProtectedRoute>
+            <PortalDriverFiles />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/app/support"
+        element={
+          <ProtectedRoute>
+            <PortalSupportTickets />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/app/settings"
+        element={
+          <ProtectedRoute>
+            <PortalSettings />
           </ProtectedRoute>
         }
       />
