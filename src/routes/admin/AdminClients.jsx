@@ -17,29 +17,12 @@ function withTimeout(promise, ms, label) {
 }
 
 async function callEdgeFunction(path, body) {
-  const base =
-    import.meta.env.VITE_SUPABASE_FUNCTIONS_URL ||
-    (import.meta.env.VITE_SUPABASE_URL ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1` : '')
-  if (!base) throw new Error('Missing VITE_SUPABASE_URL (or VITE_SUPABASE_FUNCTIONS_URL override)')
-  if (!import.meta.env.VITE_SUPABASE_ANON_KEY) throw new Error('Missing VITE_SUPABASE_ANON_KEY')
-
-  const { data } = await supabase.auth.getSession()
-  const token = data?.session?.access_token
-  if (!token) throw new Error('No active session')
-
-  const res = await fetch(`${base}/${path}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
-    },
-    body: JSON.stringify(body),
+  if (!supabase) throw new Error('Supabase is not configured')
+  const { data, error } = await supabase.functions.invoke(path, {
+    body,
   })
-
-  const json = await res.json().catch(() => ({}))
-  if (!res.ok) throw new Error(json?.error || 'Request failed')
-  return json
+  if (error) throw new Error(error?.message || 'Request failed')
+  return data
 }
 
 export default function AdminClients() {
