@@ -7,8 +7,10 @@ import Input from '../components/Input'
 import TextArea from '../components/TextArea'
 
 async function callEdgeFunction(path, body) {
-  const base = import.meta.env.VITE_SUPABASE_FUNCTIONS_URL
-  if (!base) throw new Error('Missing VITE_SUPABASE_FUNCTIONS_URL')
+  const base =
+    import.meta.env.VITE_SUPABASE_FUNCTIONS_URL ||
+    (import.meta.env.VITE_SUPABASE_URL ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1` : '')
+  if (!base) throw new Error('Missing VITE_SUPABASE_URL (or VITE_SUPABASE_FUNCTIONS_URL override)')
 
   const { data } = await supabase.auth.getSession()
   const token = data?.session?.access_token
