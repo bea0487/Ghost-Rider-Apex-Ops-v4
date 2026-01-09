@@ -19,7 +19,7 @@ export default function Login() {
     setLoading(true)
     try {
       await signInWithPassword({ email, password })
-      navigate('/')
+      navigate('/portal')
     } catch (err) {
       setError(err?.message || 'Unable to sign in')
     } finally {

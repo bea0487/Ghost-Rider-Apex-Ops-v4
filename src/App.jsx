@@ -13,6 +13,7 @@ import MarketingServices from './marketing/pages/Services'
 import MarketingTheWingman from './marketing/pages/TheWingman'
 import MarketingTheGuardian from './marketing/pages/TheGuardian'
 import MarketingApexCommand from './marketing/pages/ApexCommand'
+import BootstrapAdmin from './routes/BootstrapAdmin'
 import NotFound from './routes/NotFound'
 
 export default function App() {
@@ -66,6 +67,15 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/setup" element={<Setup />} />
+
+      <Route
+        path="/bootstrap-admin"
+        element={
+          <ProtectedRoute>
+            <BootstrapAdmin />
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path="/portal"
