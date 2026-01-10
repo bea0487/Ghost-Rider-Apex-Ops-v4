@@ -97,13 +97,15 @@ export default function AdminClients() {
       }
 
       // Use invite-user Edge Function (Service Role) to create Auth User + Client Record
-      await withTimeout(callEdgeFunction('invite-user', payload), 15000, 'Invite client')
+      // Increased timeout to 60s to account for potential cold starts or email sending delays
+      await withTimeout(callEdgeFunction('invite-user', payload), 60000, 'Invite client')
 
       setStatus(`Client invited: ${normalizedEmail}`)
       setOpen(false)
       resetForm()
       await loadClients()
     } catch (e2) {
+      console.error('Invite Error:', e2)
       setError(e2?.message || 'Unable to create client')
     } finally {
       setSaving(false)
