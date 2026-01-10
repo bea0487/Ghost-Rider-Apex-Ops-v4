@@ -90,27 +90,16 @@ export default function AdminClients() {
       if (!normalizedEmail) throw new Error('Client Email is required')
 
       const payload = {
-        action: 'create',
         email: normalizedEmail,
         client_id: String(clientId || '').trim() || undefined,
         company_name: String(companyName || '').trim() || undefined,
         tier: newTier,
       }
 
-      // Try direct insert first
-      const { error: dbError } = await supabase.from('clients').insert({
-        email: payload.email,
-        client_id: payload.client_id || null,
-        company_name: payload.company_name || null,
-        tier: payload.tier,
-      })
+      // Use invite-user Edge Function (Service Role) to create Auth User + Client Record
+      await withTimeout(callEdgeFunction('invite-user', payload), 15000, 'Invite client')
 
-      if (dbError) {
-        console.warn('Direct create failed, falling back to Edge Function:', dbError)
-        await withTimeout(callEdgeFunction('admin-clients', payload), 15000, 'Create client')
-      }
-
-      setStatus(`Client created: ${normalizedEmail}`)
+      setStatus(`Client invited: ${normalizedEmail}`)
       setOpen(false)
       resetForm()
       await loadClients()
