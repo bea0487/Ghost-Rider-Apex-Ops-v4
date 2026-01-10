@@ -6,6 +6,7 @@ import Modal from '../../components/Modal'
 import Field from '../../components/Field'
 import Input from '../../components/Input'
 import TextArea from '../../components/TextArea'
+import ClientSelect from '../../components/ClientSelect'
 import { supabase } from '../../lib/supabaseClient'
 
 export default function AdminTickets() {
@@ -211,9 +212,7 @@ export default function AdminTickets() {
               </div>
             )}
 
-            <Field label="Client UUID" hint="public.clients.id">
-              <Input value={clientId} onChange={(e) => setClientId(e.target.value)} required placeholder="e.g. 550e8400-e29b..." />
-            </Field>
+            <ClientSelect value={clientId} onChange={setClientId} />
 
             <Field label="Subject">
               <Input value={subject} onChange={(e) => setSubject(e.target.value)} required placeholder="Issue summary" />

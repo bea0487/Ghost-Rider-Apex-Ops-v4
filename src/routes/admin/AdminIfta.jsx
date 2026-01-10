@@ -5,6 +5,7 @@ import Button from '../../components/Button'
 import Modal from '../../components/Modal'
 import Field from '../../components/Field'
 import Input from '../../components/Input'
+import ClientSelect from '../../components/ClientSelect'
 import { supabase } from '../../lib/supabaseClient'
 
 export default function AdminIfta() {
@@ -169,9 +170,7 @@ export default function AdminIfta() {
               </div>
             )}
             
-            <Field label="Client UUID" hint="public.clients.id">
-              <Input value={clientId} onChange={(e) => setClientId(e.target.value)} required placeholder="e.g. 550e8400-e29b..." />
-            </Field>
+            <ClientSelect value={clientId} onChange={setClientId} />
 
             <Field label="Quarter" hint="e.g. 2024-Q1">
               <Input value={quarter} onChange={(e) => setQuarter(e.target.value)} required placeholder="YYYY-Q#" />

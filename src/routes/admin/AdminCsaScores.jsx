@@ -5,6 +5,7 @@ import Button from '../../components/Button'
 import Modal from '../../components/Modal'
 import Field from '../../components/Field'
 import Input from '../../components/Input'
+import ClientSelect from '../../components/ClientSelect'
 import { supabase } from '../../lib/supabaseClient'
 
 export default function AdminCsaScores() {
@@ -192,9 +193,7 @@ export default function AdminCsaScores() {
             )}
             
             <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Client UUID" hint="public.clients.id">
-                <Input value={clientId} onChange={(e) => setClientId(e.target.value)} required placeholder="e.g. 550e8400-e29b..." />
-              </Field>
+              <ClientSelect value={clientId} onChange={setClientId} />
               <Field label="Score Date">
                 <Input type="date" value={scoreDate} onChange={(e) => setScoreDate(e.target.value)} required />
               </Field>

@@ -6,6 +6,7 @@ import Modal from '../../components/Modal'
 import Field from '../../components/Field'
 import Input from '../../components/Input'
 import TextArea from '../../components/TextArea'
+import ClientSelect from '../../components/ClientSelect'
 import { supabase } from '../../lib/supabaseClient'
 
 async function callEdgeFunction(path, body) {
@@ -216,9 +217,7 @@ export default function AdminEldReports() {
               </div>
             )}
             
-            <Field label="Client UUID" hint="public.clients.id">
-              <Input value={clientId} onChange={(e) => setClientId(e.target.value)} required placeholder="e.g. 550e8400-e29b..." />
-            </Field>
+            <ClientSelect value={clientId} onChange={setClientId} />
 
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="Week Start">
