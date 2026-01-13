@@ -32,6 +32,7 @@ export default function AdminEldReports() {
   const [reportNotes, setReportNotes] = React.useState('')
   const [saving, setSaving] = React.useState(false)
   const [error, setError] = React.useState('')
+  const [notificationStatus, setNotificationStatus] = React.useState('')
 
   async function loadReports() {
     if (!supabase) return
@@ -105,11 +106,15 @@ export default function AdminEldReports() {
       if (insertError) throw insertError
 
       // Trigger email notification manually (since database webhooks might not be configured)
+      let notifySuccess = false
       try {
         await callEdgeFunction('notify-new-eld-report', { record: newReport })
+        notifySuccess = true
+        setNotificationStatus(`✓ Email notification sent to ${newReport.clients?.email || 'client'}`)
       } catch (notifyError) {
         console.warn('Failed to send email notification', notifyError)
-        // Don't block UI success for notification failure
+        // Don't block UI success for notification failure, but warn user
+        setNotificationStatus(`⚠ Report created but email notification failed. Client may need manual follow-up.`)
       }
 
       await loadReports()
@@ -214,6 +219,16 @@ export default function AdminEldReports() {
              {error && (
               <div className="rounded-xl border border-red-400/20 bg-red-500/10 p-3 font-rajdhani text-red-200">
                 {error}
+              </div>
+            )}
+            
+            {notificationStatus && (
+              <div className={`rounded-xl border p-3 font-rajdhani ${
+                notificationStatus.startsWith('✓')
+                  ? 'border-green-400/20 bg-green-500/10 text-green-200'
+                  : 'border-yellow-400/20 bg-yellow-500/10 text-yellow-200'
+              }`}>
+                {notificationStatus}
               </div>
             )}
             

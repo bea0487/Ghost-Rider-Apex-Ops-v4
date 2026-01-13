@@ -23,6 +23,7 @@ import AdminIfta from './routes/admin/AdminIfta'
 import AdminDataq from './routes/admin/AdminDataq'
 import AdminDriverFiles from './routes/admin/AdminDriverFiles'
 import AdminTickets from './routes/admin/AdminTickets'
+import AdminDashboardHome from './routes/AdminDashboard' // alias if needed
 
 import {
   PortalDashboard,
@@ -87,6 +88,7 @@ export default function App() {
       <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/setup" element={<Setup />} />
 
+      {/* Bootstrap admin remains available to any authenticated user (protected), because it's used to bootstrap the first admin */}
       <Route
         path="/bootstrap-admin"
         element={
@@ -105,10 +107,11 @@ export default function App() {
         }
       />
 
+      {/* Admin area: require role === 'admin' client-side (server-side checks remain authoritative) */}
       <Route
         path="/admin"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute requiredRole="admin">
             <AdminDashboard />
           </ProtectedRoute>
         }
@@ -117,7 +120,7 @@ export default function App() {
       <Route
         path="/admin/clients"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute requiredRole="admin">
             <AdminClients />
           </ProtectedRoute>
         }
@@ -126,7 +129,7 @@ export default function App() {
       <Route
         path="/admin/eld-reports"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute requiredRole="admin">
             <AdminEldReports />
           </ProtectedRoute>
         }
@@ -135,7 +138,7 @@ export default function App() {
       <Route
         path="/admin/csa-scores"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute requiredRole="admin">
             <AdminCsaScores />
           </ProtectedRoute>
         }
@@ -144,7 +147,7 @@ export default function App() {
       <Route
         path="/admin/ifta"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute requiredRole="admin">
             <AdminIfta />
           </ProtectedRoute>
         }
@@ -153,7 +156,7 @@ export default function App() {
       <Route
         path="/admin/dataq"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute requiredRole="admin">
             <AdminDataq />
           </ProtectedRoute>
         }
@@ -162,7 +165,7 @@ export default function App() {
       <Route
         path="/admin/driver-files"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute requiredRole="admin">
             <AdminDriverFiles />
           </ProtectedRoute>
         }
@@ -171,12 +174,13 @@ export default function App() {
       <Route
         path="/admin/tickets"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute requiredRole="admin">
             <AdminTickets />
           </ProtectedRoute>
         }
       />
 
+      {/* Client portal routes (protected but not admin-only) */}
       <Route
         path="/app"
         element={
@@ -249,8 +253,7 @@ export default function App() {
         }
       />
 
-      <Route path="/404" element={<NotFound />} />
-      <Route path="*" element={<Navigate to="/404" replace />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   )
 }

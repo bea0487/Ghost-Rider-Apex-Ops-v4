@@ -100,13 +100,19 @@ export default function AdminClients() {
       // Increased timeout to 60s to account for potential cold starts or email sending delays
       await withTimeout(callEdgeFunction('invite-user', payload), 60000, 'Invite client')
 
-      setStatus(`Client invited: ${normalizedEmail}`)
+      setStatus(`Client invited: ${normalizedEmail}. Invite email sent—check their inbox to set password.`)
       setOpen(false)
       resetForm()
       await loadClients()
     } catch (e2) {
       console.error('Invite Error:', e2)
-      setError(e2?.message || 'Unable to create client')
+      let userMessage = e2?.message || 'Unable to create client'
+      if (userMessage.includes('already exists') || userMessage.includes('duplicate')) {
+        userMessage = `User ${normalizedEmail} already exists. Try a different email or check if they're already registered.`
+      } else if (userMessage.includes('timed out')) {
+        userMessage = 'Request timed out. Refresh and try again. They may still have received an invite.'
+      }
+      setError(userMessage)
     } finally {
       setSaving(false)
     }
