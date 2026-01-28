@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
   const { error: updateErr } = await admin.auth.admin.updateUserById(callerId, {
     app_metadata: {
       ...(caller?.user?.app_metadata || {}),
-      role: 'apex_command',
+      role: 'admin'
     },
   })
 
